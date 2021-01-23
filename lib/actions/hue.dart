@@ -1,19 +1,28 @@
+import 'package:HomeMonitor/models/Credential.dart';
 import 'package:http/http.dart';
 import 'package:hue_dart/hue_dart.dart';
+import 'database.dart';
 
 class Hue {
   final client = Client();
   Bridge bridge;
   final name = 'hue_dart';
-  final userName = '';
+  String userName;
+  var db = DataBase();
+  var credential = Credential('hue_token');
 
   Future connect() async {
+    // Get username from database
+    var a = await db.open();
+    Future<Credential> b = credential.getFirst(a, name);
+    b.then((credential) => {userName = credential.value});
+
+    // Set up hue connection
     final discoveryResult = await search().then((value) {
       print(value);
       createBridge(value);
       return true;
     });
-
     return discoveryResult;
   }
 
